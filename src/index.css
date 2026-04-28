@@ -22,3 +22,19 @@ body {
   background: #6366f1;
   border-radius: 10px;
 }
+
+.animate-month-change {
+  animation: month-change 180ms ease-out;
+}
+
+@keyframes month-change {
+  from {
+    opacity: 0.65;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

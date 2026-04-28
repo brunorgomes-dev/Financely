@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Plus, Tag, Trash2, X } from 'lucide-react';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
 import { MONTHS } from '../constants/finance';
 import { formatAmount } from '../utils/currency';
 import { isSameDate } from '../utils/date';
@@ -17,18 +19,50 @@ const ExpenseModal = ({
   onStartAddingExpense,
   selectedDate,
 }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState(null);
+
+  useEffect(() => {
+    if (!selectedDate) {
+      return undefined;
+    }
+
+    const frame = requestAnimationFrame(() => setIsVisible(true));
+
+    return () => cancelAnimationFrame(frame);
+  }, [selectedDate]);
+
   if (!selectedDate) {
     return null;
   }
 
   const dayExpenses = expenses.filter((expense) => isSameDate(expense.date, selectedDate));
+  const categoryToDelete = categories.find((category) => category.id === expenseToDelete?.categoryId);
+
+  const closeWithAnimation = () => {
+    setIsVisible(false);
+    window.setTimeout(onClose, 180);
+  };
+
+  const confirmDeleteExpense = () => {
+    if (!expenseToDelete) {
+      return;
+    }
+
+    onDeleteExpense(expenseToDelete.id);
+    setExpenseToDelete(null);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-md">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-md transition-opacity duration-200 ${
+        isVisible ? 'opacity-100' : 'opacity-0'
+      }`}
+    >
       <div
-        className={`w-full max-w-lg overflow-hidden rounded-[3rem] shadow-2xl ${
-          darkMode ? 'border border-slate-800 bg-slate-900' : 'border border-slate-100 bg-white'
-        }`}
+        className={`w-full max-w-lg overflow-hidden rounded-[3rem] shadow-2xl transition-all duration-200 ${
+          isVisible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-3 scale-95 opacity-0'
+        } ${darkMode ? 'border border-slate-800 bg-slate-900' : 'border border-slate-100 bg-white'}`}
       >
         <div className="flex items-center justify-between p-8 pb-4">
           <div>
@@ -41,7 +75,7 @@ const ExpenseModal = ({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={closeWithAnimation}
             className="rounded-full p-3 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
             aria-label="Fechar lançamentos"
           >
@@ -140,7 +174,7 @@ const ExpenseModal = ({
                         <span className="text-lg font-black">{formatAmount(expense.amount)}</span>
                         <button
                           type="button"
-                          onClick={() => onDeleteExpense(expense.id)}
+                          onClick={() => setExpenseToDelete(expense)}
                           className="rounded-full p-2 text-rose-500 transition-all hover:bg-rose-50 dark:hover:bg-rose-500/10"
                           aria-label="Excluir gasto"
                         >
@@ -155,6 +189,16 @@ const ExpenseModal = ({
           )}
         </div>
       </div>
+
+      {expenseToDelete && (
+        <ConfirmDeleteModal
+          category={categoryToDelete}
+          darkMode={darkMode}
+          expense={expenseToDelete}
+          onCancel={() => setExpenseToDelete(null)}
+          onConfirm={confirmDeleteExpense}
+        />
+      )}
     </div>
   );
 };

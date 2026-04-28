@@ -1,15 +1,23 @@
+import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { DAYS_OF_WEEK, MONTHS } from '../constants/finance';
 import { isSameDate } from '../utils/date';
 import { formatAmount } from '../utils/currency';
 
 const CalendarView = ({ calendarDays, currentDate, darkMode, onDateChange, onSelectDate, selectedDate }) => {
+  const [monthAnimationKey, setMonthAnimationKey] = useState(0);
+
+  const changeMonth = (date) => {
+    setMonthAnimationKey((currentKey) => currentKey + 1);
+    onDateChange(date);
+  };
+
   const goToPreviousMonth = () => {
-    onDateChange(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    changeMonth(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   };
 
   const goToNextMonth = () => {
-    onDateChange(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    changeMonth(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
   return (
@@ -17,9 +25,12 @@ const CalendarView = ({ calendarDays, currentDate, darkMode, onDateChange, onSel
       <header className="flex shrink-0 items-center justify-between gap-4">
         <div className="flex flex-col">
           <span className="mb-1 text-xs font-black uppercase tracking-[0.2em] text-indigo-500">
-            Cabo Verde
+            Bem vindo de volta, <span className="text-slate-500 dark:text-slate-400">Bruno</span>
           </span>
-          <h2 className="text-3xl font-black tracking-tighter xl:text-4xl">
+          <h2
+            key={`month-title-${monthAnimationKey}`}
+            className="animate-month-change text-3xl font-black tracking-tighter xl:text-4xl"
+          >
             {MONTHS[currentDate.getMonth()]}{' '}
             <span className="font-light text-slate-300 dark:text-slate-700">{currentDate.getFullYear()}</span>
           </h2>
@@ -36,7 +47,7 @@ const CalendarView = ({ calendarDays, currentDate, darkMode, onDateChange, onSel
           </button>
           <button
             type="button"
-            onClick={() => onDateChange(new Date())}
+            onClick={() => changeMonth(new Date())}
             className="px-4 py-1 text-xs font-black uppercase tracking-widest transition-colors hover:text-indigo-600"
           >
             Hoje
@@ -70,7 +81,10 @@ const CalendarView = ({ calendarDays, currentDate, darkMode, onDateChange, onSel
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-2 lg:min-h-0 lg:flex-1 lg:auto-rows-fr xl:gap-3">
+        <div
+          key={`month-grid-${monthAnimationKey}`}
+          className="animate-month-change grid grid-cols-7 gap-2 lg:min-h-0 lg:flex-1 lg:auto-rows-fr xl:gap-3"
+        >
           {calendarDays.map((item) => {
             if (!item.day) {
               return <div key={item.key} className="aspect-square lg:aspect-auto lg:min-h-0" />;
