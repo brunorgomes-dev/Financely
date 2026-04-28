@@ -1,10 +1,21 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import UserMenu from './UserMenu';
 import { DAYS_OF_WEEK, MONTHS } from '../constants/finance';
 import { isSameDate } from '../utils/date';
 import { formatAmount } from '../utils/currency';
 
-const CalendarView = ({ calendarDays, currentDate, darkMode, onDateChange, onSelectDate, selectedDate }) => {
+const CalendarView = ({
+  calendarDays,
+  currentDate,
+  darkMode,
+  onDateChange,
+  onOpenProfile,
+  onSelectDate,
+  onSignOut,
+  selectedDate,
+  userName,
+}) => {
   const [monthAnimationKey, setMonthAnimationKey] = useState(0);
 
   const changeMonth = (date) => {
@@ -24,9 +35,7 @@ const CalendarView = ({ calendarDays, currentDate, darkMode, onDateChange, onSel
     <main className="flex flex-1 flex-col gap-8 lg:min-h-0 lg:gap-4 xl:gap-5">
       <header className="flex shrink-0 items-center justify-between gap-4">
         <div className="flex flex-col">
-          <span className="mb-1 text-xs font-black uppercase tracking-[0.2em] text-indigo-500">
-            Bem vindo de volta, <span className="text-slate-500 dark:text-slate-400">Bruno</span>
-          </span>
+          <UserMenu userName={userName} onOpenProfile={onOpenProfile} onSignOut={onSignOut} />
           <h2
             key={`month-title-${monthAnimationKey}`}
             className="animate-month-change text-3xl font-black tracking-tighter xl:text-4xl"
